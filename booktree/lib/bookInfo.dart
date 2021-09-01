@@ -7,7 +7,6 @@ class BookInfo {
   final String writeDate;
   final String bookReview;
 
-
   BookInfo(
       {this.bookId,
       required this.bookImage,
@@ -27,6 +26,25 @@ class BookInfo {
         bookReview = res['bookReview'];
 
   Map<String, Object?> toMap() {
-    return {'bookId': bookId, 'bookImage': bookImage, 'bookTitle': bookTitle, 'bookPublisher': bookPublisher, 'bookAuthors': bookAuthors, 'writeDate': writeDate, 'bookReview': bookReview};
+    return {
+      'bookId': bookId,
+      'bookImage': bookImage,
+      'bookTitle': bookTitle,
+      'bookPublisher': bookPublisher,
+      'bookAuthors': bookAuthors,
+      'writeDate': writeDate,
+      'bookReview': bookReview
+    };
+  }
+
+  Map<String, Object?> toinsertMap() {
+    return {
+      'bookImage': bookImage,
+      'bookTitle': bookTitle,
+      'bookPublisher': bookPublisher,
+      'bookAuthors': bookAuthors,
+      'writeDate': writeDate,
+      'bookReview': bookReview
+    };
   }
 }

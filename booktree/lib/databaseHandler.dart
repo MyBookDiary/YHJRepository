@@ -22,12 +22,14 @@ class DatabaseHandler {
     final Database db = await initializeDB();
     for (var bookinfo in bookinfos) {
       result = await db.rawInsert(
-          'insert into bookinfo(bookImage, bookTitle, bookAuthors, writeDate) values (?,?,?,?)',
+          'insert into bookinfo(bookImage, bookTitle, bookPublisher, bookAuthors, writeDate, bookReview) values (?,?,?,?,?,?)',
           [
             bookinfo.bookImage,
             bookinfo.bookTitle,
+            bookinfo.bookPublisher,
             bookinfo.bookAuthors,
-            bookinfo.writeDate
+            bookinfo.writeDate,
+            bookinfo.bookReview
           ]);
     }
     return result;

@@ -1,5 +1,8 @@
+import 'package:booktree/databaseHandler.dart';
 import 'package:booktree/detailBook.dart';
 import 'package:flutter/material.dart';
+
+import 'bookInfo.dart';
 
 class ListBook extends StatefulWidget {
   const ListBook({Key? key}) : super(key: key);
@@ -9,110 +12,176 @@ class ListBook extends StatefulWidget {
 }
 
 class _ListBookState extends State<ListBook> {
+  late DatabaseHandler handler;
   List bookList = ['오늘의 독후감1', '오늘의 독후감2', '오늘의 독후감3'];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    handler = DatabaseHandler();
+    // handler.initializeDB().whenComplete(() async {
+    //   await addBookInfo();
+    //   setState(() {});
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List'),
+        title: Text('나의 기록'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-          child: ListView.builder(
-            itemBuilder: (context, position) {
-              return GestureDetector(
-                child: Container(
-                  child: Card(
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          'images/logo.png',
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.contain,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(5, 5, 20, 5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${bookList[0]}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '2021-08-31',
-                                style: TextStyle(fontSize: 15),
-                              )
-                            ],
+      body: FutureBuilder(
+          future: handler.queryBookInfo(),
+          builder:
+              (BuildContext context, AsyncSnapshot<List<BookInfo>> snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  itemCount: snapshot.data?.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Dismissible(
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Icon(
+                            Icons.delete_forever,
+                            size: 70,
+                            color: Colors.white,
                           ),
                         ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(5, 5, 20, 5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${bookList[0]}',
-                                style: TextStyle(fontSize: 15),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '2021-08-31',
-                                style: TextStyle(fontSize: 15),
-                              )
-                            ],
+                        key: ValueKey<int>(snapshot.data![index].bookId!),
+                        onDismissed: (DismissDirection direction) async {
+                          await handler
+                              .deleteBookInfo(snapshot.data![index].bookId!);
+                          setState(() {
+                            snapshot.data!.remove(snapshot.data![index]);
+                          });
+                        },
+                        child: GestureDetector(
+                          child: Card(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "Image :",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(snapshot.data![index].bookImage)
+                                      //Text('Image')
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "Title :",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(snapshot.data![index].bookTitle)
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "Authors :",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(snapshot.data![index].bookAuthors)
+                                      //Text('Book Authors')
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "Publisher :",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(snapshot.data![index].bookPublisher)
+                                      //Text('Publisher')
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    color: Colors.blueGrey[50],
-                  ),
-                  width: 300,
-                  height: 150,
-                  //color: Colors.blueGrey[100],
-                ),
-                onTap: () {
-                  //상세화면 -- id 정보 가져가야함! 변경!
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return DetailBook();
-                  })).then((value) => reloadData());
-                },
-                onLongPress: () {
-                  //길게 누르면 삭제 가능
-                },
+                          onTap: () {
+                            // Navigator.push(context,
+                            //     MaterialPageRoute(builder: (context) {
+                            //   return UpdateStudents(
+                            //       rcode: snapshot.data![index].code,
+                            //       rname: snapshot.data![index].name,
+                            //       rdept: snapshot.data![index].dept,
+                            //       rphone: snapshot.data![index].phone);
+                            // })).then((value) => reloadData());
+                            //상세화면 -- id 정보 가져가야함! 변경!
+
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return DetailBook(
+                                  rBookId: snapshot.data![index].bookId!,
+                                  rBookTitle: snapshot.data![index].bookTitle,
+                                  rBookImage: snapshot.data![index].bookImage,
+                                  rBookAuthors:
+                                      snapshot.data![index].bookAuthors,
+                                  rBookPublisher:
+                                      snapshot.data![index].bookPublisher,
+                                  rwriteDate: snapshot.data![index].writeDate,
+                                  rBookReview:
+                                      snapshot.data![index].bookReview);
+                            })).then((value) => reloadData());
+                          },
+                        ));
+                  });
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
               );
-            }, //itemBuilder
-            itemCount: 10,
-          ),
-        ),
-      ),
+            }
+          }),
     );
+  }
+
+  Future<int> addBookInfo() async {
+    BookInfo firstBookInfo = BookInfo(
+        bookImage: 'image1',
+        bookTitle: '오늘의 독후감 hek',
+        bookPublisher: 'HappyHe',
+        bookAuthors: 'HEK',
+        writeDate: '어제',
+        bookReview: '행복함');
+    BookInfo secondBookInfo = BookInfo(
+        bookImage: 'image2',
+        bookTitle: '오늘의 독후감 jyp',
+        bookPublisher: 'Colorful',
+        bookAuthors: 'JYP',
+        writeDate: '오늘',
+        bookReview: '즐거움');
+
+    List<BookInfo> listOfBookInfo = [firstBookInfo, secondBookInfo];
+    return await handler.insertBookInfo(listOfBookInfo);
   }
 
   void reloadData() {
     setState(() {
       print('Reload BookList Data');
-      //handler.queryStudents();
+      handler.queryBookInfo();
     });
   }
-}//listBook.dart
+}//<<<<<<<<

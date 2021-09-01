@@ -1,3 +1,4 @@
+import 'package:booktree/databaseHandler.dart';
 import 'package:booktree/homepage.dart';
 import 'package:booktree/information.dart';
 import 'package:booktree/listBook.dart';
@@ -23,21 +24,23 @@ class MyApp extends StatelessWidget {
 }
 
 class TabBarAction extends StatefulWidget {
-  const TabBarAction({ Key? key }) : super(key: key);
+  const TabBarAction({Key? key}) : super(key: key);
 
   @override
   _TabBarActionState createState() => _TabBarActionState();
 }
 
-class _TabBarActionState extends State<TabBarAction> 
-with SingleTickerProviderStateMixin{
+class _TabBarActionState extends State<TabBarAction>
+    with SingleTickerProviderStateMixin {
   late TabController controller;
   int _currentIndex = 0;
+  late DatabaseHandler handler;
 
   @override
   void initState() {
     super.initState();
     controller = TabController(length: 3, vsync: this);
+    handler = DatabaseHandler();
   }
 
   @override
@@ -45,11 +48,10 @@ with SingleTickerProviderStateMixin{
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: TabBarView(
-        children: [HomePage(), ListBook(), Information()],
-        controller: controller
-      ),
+          children: [HomePage(), ListBook(), Information()],
+          controller: controller),
       bottomNavigationBar: TabBar(
-        onTap: (index){
+        onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
@@ -58,18 +60,24 @@ with SingleTickerProviderStateMixin{
         labelColor: Colors.grey[500],
         tabs: [
           Tab(
-            icon: Icon(Icons.home,
-            color: _currentIndex == 0 ? Colors.grey[700] : Colors.grey[400],),
+            icon: Icon(
+              Icons.home,
+              color: _currentIndex == 0 ? Colors.grey[700] : Colors.grey[400],
+            ),
             text: 'Home',
           ),
           Tab(
-            icon: Icon(Icons.book,
-            color: _currentIndex == 1 ? Colors.grey[700] : Colors.grey[400],),
+            icon: Icon(
+              Icons.book,
+              color: _currentIndex == 1 ? Colors.grey[700] : Colors.grey[400],
+            ),
             text: 'List',
           ),
           Tab(
-            icon: Icon(Icons.account_balance,
-            color: _currentIndex == 2 ? Colors.grey[700] : Colors.grey[400],),
+            icon: Icon(
+              Icons.account_balance,
+              color: _currentIndex == 2 ? Colors.grey[700] : Colors.grey[400],
+            ),
             text: 'Info',
           ),
         ],

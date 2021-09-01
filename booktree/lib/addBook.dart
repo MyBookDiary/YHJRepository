@@ -1,3 +1,5 @@
+import 'package:booktree/bookInfo.dart';
+import 'package:booktree/databaseHandler.dart';
 import 'package:booktree/searchBook.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,8 @@ class AddBook extends StatefulWidget {
 }
 
 class _AddBookState extends State<AddBook> {
+  // DataBaseHandler
+  late DatabaseHandler handler;
   final BookTitle = TextEditingController();
   final BookPublisher = TextEditingController();
   final BookAuthors = TextEditingController();
@@ -45,7 +49,7 @@ class _AddBookState extends State<AddBook> {
   @override
   void initState() {
     super.initState();
-
+    handler = DatabaseHandler();
     DateTime nowTime = new DateTime.now();
     WriteDate.text = nowTime.toString().substring(0, 10);
 
@@ -77,7 +81,7 @@ class _AddBookState extends State<AddBook> {
                   SizedBox(width: 30),
                   Container(
                     child: ExtendedImage.network(
-                      "",
+                      BookImagestr,
                       height: 150,
                       width: 130,
                       fit: BoxFit.fill,
@@ -103,6 +107,7 @@ class _AddBookState extends State<AddBook> {
                               BookTitle.text.trim() == "") {
                             errorSnackBar(context);
                           } else {
+                            Navigator.of(context).pop();
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
                               return SearchBook(rbooktitle: BookTitle.text);
@@ -181,8 +186,8 @@ class _AddBookState extends State<AddBook> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                setState(() {
+              onPressed: () async {
+                setState(() async {
                   if (BookTitle.text.isEmpty ||
                       BookPublisher.text.isEmpty ||
                       BookAuthors.text.isEmpty ||
@@ -198,7 +203,19 @@ class _AddBookState extends State<AddBook> {
                       duration: Duration(seconds: 1),
                       backgroundColor: Colors.red,
                     ));
-                  } else {}
+                  } else {
+                    BookInfo bookinfo = BookInfo(
+                        bookImage: BookImagestr,
+                        bookTitle: BookTitle.text,
+                        bookPublisher: BookPublisher.text,
+                        bookAuthors: BookAuthors.text,
+                        writeDate: WriteDate.text,
+                        bookReview: BookReview.text);
+                    print("Error");
+                    List<BookInfo> listOfBooks = [bookinfo];
+                    await handler.insertBookInfo(listOfBooks);
+                    _showDialog(context);
+                  }
                 });
               },
               child: Text("등록 하기"),
@@ -223,4 +240,27 @@ void errorSnackBar(BuildContext context) {
       backgroundColor: Colors.amber,
     ),
   );
+}
+
+void _showDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("입력 결과"),
+          content: Text("입력이 완료 되었습니다."),
+          actions: [
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blue),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pop(context); // Main화면으로 이동
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      });
 }
