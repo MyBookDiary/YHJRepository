@@ -1,27 +1,59 @@
 import 'package:booktree/searchBook.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 
 class AddBook extends StatefulWidget {
-  const AddBook({Key? key}) : super(key: key);
+  final String rBookImage;
+  final String rBookTitle;
+  final String rBookPublisher;
+  final String rBookAuthors;
+
+  const AddBook({
+    Key? key,
+    required this.rBookImage,
+    required this.rBookTitle,
+    required this.rBookPublisher,
+    required this.rBookAuthors,
+  }) : super(key: key);
 
   @override
-  _AddBookState createState() => _AddBookState();
+  _AddBookState createState() =>
+      _AddBookState(rBookImage, rBookTitle, rBookPublisher, rBookAuthors);
 }
 
 class _AddBookState extends State<AddBook> {
-  // final BookImage = TextEditingController();
   final BookTitle = TextEditingController();
   final BookPublisher = TextEditingController();
   final BookAuthors = TextEditingController();
   final WriteDate = TextEditingController();
   final BookReview = TextEditingController();
 
+  String BookImagestr = '';
+  String BookTitlestr = '';
+  String BookPublisherStr = '';
+  String BookAuthorStr = '';
+
+  //constructor
+  _AddBookState(String rBookImage, String rBookTitle, String rBookPublisher,
+      String rBookAuthor) {
+    this.BookImagestr = rBookImage;
+    this.BookTitlestr = rBookTitle;
+    this.BookPublisherStr = rBookPublisher;
+    this.BookAuthorStr = rBookAuthor;
+  }
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      WriteDate.text = '????-??-??';
-    });
+
+    DateTime nowTime = new DateTime.now();
+    WriteDate.text = nowTime.toString().substring(0, 10);
+
+    BookTitle.text = BookTitlestr;
+    BookPublisher.text = BookPublisherStr;
+    BookAuthors.text = BookAuthorStr;
+    print("받은 이미지 주소 : $BookImagestr ");
+    setState(() {});
   }
 
   @override
@@ -38,11 +70,24 @@ class _AddBookState extends State<AddBook> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage("images/bookimage.png"),
-                    radius: 70.0,
-                  ),
+                  // CircleAvatar(
+                  //   backgroundImage: AssetImage("images/bookimage.png"),
+                  //   radius: 70.0,
+                  // ),
                   SizedBox(width: 30),
+                  Container(
+                    child: ExtendedImage.network(
+                      "",
+                      height: 150,
+                      width: 130,
+                      fit: BoxFit.fill,
+                      cache: true,
+                      shape: BoxShape.rectangle,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
                   Container(
                     child: TextField(
                       controller: BookTitle,
@@ -54,10 +99,15 @@ class _AddBookState extends State<AddBook> {
                   Container(
                     child: GestureDetector(
                         onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return SearchBook();
-                          }));
+                          if (BookTitle.text.isEmpty ||
+                              BookTitle.text.trim() == "") {
+                            errorSnackBar(context);
+                          } else {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return SearchBook(rbooktitle: BookTitle.text);
+                            }));
+                          }
                         },
                         child: Icon(Icons.search)),
                     padding: const EdgeInsets.all(10.0),
@@ -139,11 +189,16 @@ class _AddBookState extends State<AddBook> {
                       WriteDate.text.isEmpty ||
                       BookReview.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("빈 칸 없이 채워주세요!"),
+                      content: Text(
+                        "빈 칸 없이 채워주세요!",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
                       duration: Duration(seconds: 1),
                       backgroundColor: Colors.red,
                     ));
-                  }
+                  } else {}
                 });
               },
               child: Text("등록 하기"),
@@ -153,4 +208,19 @@ class _AddBookState extends State<AddBook> {
       ),
     );
   }
+}
+
+void errorSnackBar(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        '책 제목을 입력해 주세요!',
+        style: TextStyle(
+          fontSize: 20,
+        ),
+      ),
+      duration: Duration(seconds: 2),
+      backgroundColor: Colors.amber,
+    ),
+  );
 }
